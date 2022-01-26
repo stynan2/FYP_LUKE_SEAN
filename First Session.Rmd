@@ -1,0 +1,270 @@
+---
+title: "Intro To R and Rmarkdown"
+author: "Module: ST413 Statistical Modelling"
+date: "9/8/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# What will be covered in this session
+
+At this session, Topics in the first session will be covered. Outline for Today is:
+
+1- Reading a CSV file via native R function
+
+2- Using "read_csv" function in "tidyverse" package
+
+3- Using "filter" and "select" functions as a part of data wrangling
+
+4- Using Native R functions to draw Histogram and Boxplot
+
+5- Using ggplot to draw same plots.
+
+6- Generate useful summary via tidyverse package
+
+
+## Installing required Packges
+
+At very first step, it is required to install needed packages.
+
+We can use "install.packages" function to set our required packages up.
+
+The code is as follow:
+
+` install.packages("tidyverse")`
+
+` install.packages("ggplot2")`
+
+Next step will be calling the packages as follow:
+
+`library(tidyverse)`
+
+`library(ggplot2)`
+
+## Reading a CSV file via native R function
+
+There are a couple of functions with different purposes to read data from external files such as .csv files and .txt files.
+
+
+`read.table(Arg,..)`
+
+`read.csv(Arg,..)`
+
+In the R environment, there is always a default directory which is the "Documents" folder. When we are working with the Rmarkdown, the default directory will be where the Rmarkdown file has been saved.
+
+Typically, R will read data from the default directory. For reading a required you need to locate the file in the default directory. Afterwards, we can easily recall the file through the below R antive command:
+
+
+```{r}
+
+Data.mpg <- read.csv(file="mtcars.csv")
+
+#or 
+
+Data.mpg = read.csv("mtcars.csv")
+
+
+glimpse(Data.mpg)
+
+```
+
+
+## Using "read_csv" function in "tidyverse" package
+
+For making the example a little bit different from the previous one, I'm going to use a dataset without header in the first row. Also I'm going to use function in tidyverse package to read a csv file.
+
+In the first example, I've tried to read a csv file without header. 
+
+In the Second one, header has been defined in order to assign a name to each column.
+
+One of advantage of using tidyverse functions rather than native R functions is handling words with special characters. As it is clear, I've compared two functions with each other and there is special character in "volume" column.   
+
+
+```{r}
+
+Data <- read_csv("stock prices - No header.csv",col_names =F,)
+glimpse(Data)
+
+Data <- read_csv("stock prices - No header.csv",col_names =
+                   c("symbol","date","open","high","low","close","volume"))
+glimpse(Data)
+
+
+Data <- read.csv("stock prices.csv")
+glimpse(Data)
+Data <- read_csv("stock prices.csv")
+glimpse(Data)
+
+
+```
+
+
+## Using "filter" and "select" functions as a part of data wrangling
+
+Now we got our dataset. So I'm going to show you how to generate a simple statistical summary from the dataset.
+
+Including native commands for obtaining summary statistics and drawing plots, two packages easily help us to have a better experience on using R to obtain some summaries and plots. "tidyverse" and "ggplot2" are two packages which help us in data wrangling and visualisation respectively.
+
+For using these packages, it is required to install them on the machine as it was mentioned before.
+
+Suppose that we are going to obtain the average mileage per gallon(mpg) for different number of cylinder.
+
+We can use following commands for filtering dataset based on a variable and slelect a variable of interest in a study.
+
+```{r}
+library(tidyverse)
+# For example, I'm going to show how we can calculate average mpg for 8 cylinder cars
+# First off, it is required to filter out all those cars with 8 cylinders.
+# "filter" function in here will help us to filter out required data.
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==8)
+glimpse(Filtered.Data)
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==6)
+glimpse(Filtered.Data)
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==4)
+glimpse(Filtered.Data)
+
+# It is possible to select just required variable rather that having all of them
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==8) %>%
+  select(mpg,cyl)
+
+glimpse(Filtered.Data)
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==6) %>%
+  select(mpg,cyl)
+glimpse(Filtered.Data)
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==4) %>%
+  select(mpg,cyl)
+glimpse(Filtered.Data)
+
+
+```
+
+# Using Native R functions to draw Histogram and Boxplot
+
+Now, we are going to generate a suitable plot for each filtered dataset.
+We can easily use native R function to draw boxplot or histogram for visualisation. 
+
+
+```{r fig.height=3.5, fig.width=4.5}
+#Imagine we are going to draw boxplot of mpg for 4 cylinder cars.
+
+Filtered.Data <- Data.mpg %>%
+  filter(cyl==4) %>%
+  select(mpg,cyl)
+
+boxplot(Filtered.Data$mpg)
+
+hist(Filtered.Data$mpg,main = "Histogram of mpg for 4 cylinder cars",xlab = "Mileage per Gallon")
+
+## It does not seem pretty, so we can change breaks in order to change length of histograms intervals or "bins"
+
+hist(Filtered.Data$mpg,main = "Histogram of mpg for 4 cylinder cars",xlab = "Mileage per Gallon",breaks = 3)
+
+
+```
+
+
+## Using ggplot to draw same plots.
+
+```{r fig.height=3.5, fig.width=4.5}
+
+#Using ggplot2 
+
+library(ggplot2)
+
+Filtered.Data %>% ggplot(aes(y=mpg,x=cyl)) +
+  geom_boxplot()
+
+Filtered.Data %>% ggplot(aes(x=mpg)) +
+  geom_boxplot()
+
+Filtered.Data %>% ggplot(aes(y=mpg)) +
+  geom_histogram()
+
+Filtered.Data %>% ggplot(aes(x=mpg)) +
+  geom_histogram()
+
+## As same as what we did with the native R function, We can modify the histogram.
+## for make it informative we can change "bins" argument in the function to a desired value
+
+Filtered.Data %>% ggplot(aes(x=mpg)) +
+  geom_histogram(bins = 3)
+
+
+## Also we are going to draw a histogram for the stock market we read it before.
+## The price of AAPL has been draw as follow:
+
+
+Data %>% filter(symbol=="AAPL") %>% ggplot(aes(x=open)) +
+  geom_histogram(bins = 20)
+
+
+
+# How can we have different box plot for different number of cylinder in one plot
+
+Filtered.Data <- Data.mpg %>%
+  select(mpg,cyl)
+
+Filtered.Data %>% ggplot(aes(y=mpg,x=cyl,group=cyl)) +
+  geom_boxplot()
+
+
+# Also, another example regarding stock market has been provided for drawing boxplot along with different symbols
+
+
+Data %>% filter(symbol==c("AAPL","ABBV","ACN","ADP","AIZ")) %>%
+  ggplot(aes(y=open,x=symbol,group=symbol)) +
+  geom_boxplot()
+
+
+```
+
+
+## Generate useful summary via tidyverse package
+
+At the end I'm going to show how to use tidyverse to obtain summary statistics from dataset.
+Typically, It is a little bit time consuming to generate descriptive statistics by using R native function in comparison to using tidyverse packages functions.
+
+```{r}
+
+Data.mpg %>%
+  group_by(cyl) %>%
+  summarise(mean(mpg),sd(mpg),var(mpg))
+
+Data.mpg %>%
+  group_by(cyl) %>%
+  summarise(n=n())
+
+Data.mpg %>%
+  group_by(cyl) %>%
+  summarise(n=n(),mean.mpg=mean(mpg))
+
+
+Data.mpg %>%
+  group_by(cyl) %>%
+  summarise(n=n(),mean.mpg=mean(mpg),min.mpg=min(mpg),max.mpg=max(mpg))
+
+
+
+
+```
+
+
+
