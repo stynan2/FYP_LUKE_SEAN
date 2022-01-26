@@ -1,9 +1,5 @@
-install.packages(c("rmarkdown", "evaluate", "asserthat", "ggplot2", "purrr", "tibble", "dplyr", "tidyr", "stringr",
-                   "readr", "forcats", "tidyverse"), 
+install.packages(c("rmarkdown", "ggplot2","dplyr", "tidyr",
+                   "readr", "tidyverse"), 
                  dependencies = TRUE,
                  repos = 'http://cran.us.r-project.org')
 
-install.packages(c("rmarkdown", "car", "aplore3", "titanic", "evaluate", "asserthat", "ggplot2", "purrr", "tibble", "dplyr", "tidyr", "stringr",
-                   "readr", "forcats", "tidyverse"), 
-                 dependencies = TRUE,
-                 repos = 'http://cran.us.r-project.org')
