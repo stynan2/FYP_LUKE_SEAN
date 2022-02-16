@@ -1,0 +1,349 @@
+---
+title: "Test run 2"
+author: "Luke Finn & Sean Tynan"
+date: "2/10/2022"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r,include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(stargazer)
+library(dplyr)
+heartfaildata=read.csv(file=file.choose())
+```
+
+```{r}
+filtered.data<-heartfaildata %>% select(age)
+filtered.data=filtered.data%>%mutate(age_cat=cut(age,breaks=c(39,50,60,70,80,95)))%>%na.omit()
+filtered.data.tbl <- filtered.data %>% group_by(age_cat, .drop = F) %>%
+  tally() %>% spread(age_cat, n, replace_na(0)) %>%
+  mutate(Total = `(39,50]` + `(50,60]`+`(60,70]`+`(70,80]`+`(80,95]`)
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tbl, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.data = filtered.data.tbl %>% select("age_cat_3950"="(39,50]","age_cat_5060"="(50,60]","age_cat_6070"="(60,70]","age_cat_7080"="(70,80]","age_cat_8095"="(80,95]", "Total")
+Tablefiltered.data %>% print(n = Inf)
+
+```
+
+
+
+```{r}
+filtered.data1<-heartfaildata %>% select(age,sex)
+filtered.data1=filtered.data1%>%mutate(age_cat=cut(age,breaks=c(39,50,60,70,80,95)))%>%na.omit()
+filtered.data.tbl1 <- filtered.data1 %>% group_by(age_cat,sex, .drop = F) %>%
+  tally() %>% spread(sex, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tbl1, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.data1 = filtered.data.tbl1 %>% select("age_cat","sex_female" = "0", "sex_male" = "1", "Total")
+Tablefiltered.data1 %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefiltered.data1) + geom_bar(aes(x = age_cat, y = Total,fill=age_cat),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefiltered.data1 , color = "white",
+            aes(x = age_cat, y = Total, label = Total), position = position_stack(0.5))  
+```
+
+```{r}
+filtered.datasmk<-heartfaildata %>% select(smoking,sex)
+filtered.data.tblsmk <- filtered.datasmk %>% group_by(smoking,sex, .drop = F) %>%
+  tally() %>% spread(sex, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+filtered.data.tblsmk$smoking[filtered.data.tblsmk$smoking == 0] <- "No"
+filtered.data.tblsmk$smoking[filtered.data.tblsmk$smoking == 1] <- "Yes"
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tblsmk, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.datasmk = filtered.data.tblsmk %>% select("smoking","sex_female" = "0", "sex_male" = "1", "Total")
+Tablefiltered.datasmk %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefiltered.datasmk) + geom_bar(aes(x = smoking, y = Total,fill=smoking),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefiltered.datasmk, color = "white",
+            aes(x = smoking, y = Total, label = Total), position = position_stack(0.5))  
+```
+
+```{r}
+filtered.datasex<-heartfaildata %>% select(smoking,sex)
+filtered.data.tblsex <- filtered.datasex %>% group_by(sex,smoking, .drop = F) %>%
+  tally() %>% spread(smoking, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+filtered.data.tblsex$sex[filtered.data.tblsex$sex == 0] <- "Female"
+filtered.data.tblsex$sex[filtered.data.tblsex$sex == 1] <- "Male"
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tblsex, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.datasex = filtered.data.tblsex %>% select("sex","smoking_no"= "0", "smoking_yes" = "1", "Total")
+Tablefiltered.datasex %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefiltered.datasex) + geom_bar(aes(x = sex, y = Total,fill=sex),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefiltered.datasex, color = "white",
+            aes(x = sex, y = Total, label = Total), position = position_stack(0.5)) 
+```
+
+
+```{r}
+filtered.datadiab<-heartfaildata %>% select(smoking,diabetes)
+filtered.data.tbldiab <- filtered.datadiab %>% group_by(diabetes,smoking, .drop = F) %>%
+  tally() %>% spread(smoking, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+filtered.data.tbldiab$diabetes[filtered.data.tbldiab$diabetes== 0] <- "No"
+filtered.data.tbldiab$diabetes[filtered.data.tbldiab$diabetes == 1] <- "Yes"
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tbldiab, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.datadiab = filtered.data.tbldiab %>% select("diabetes","smoking_no"= "0", "smoking_yes" = "1", "Total")
+Tablefiltered.datadiab %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefiltered.datadiab) + geom_bar(aes(x = diabetes, y = Total,fill=diabetes),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefiltered.datadiab, color = "white",
+            aes(x = diabetes, y = Total, label = Total), position = position_stack(0.5)) 
+```
+
+
+
+```{r}
+heart_1=heartfaildata%>%select(time,DEATH_EVENT,sex)
+heart_1=heart_1%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+heart_1=heart_1%>%relocate(time_cat,time)
+heart_1.tbl <- heart_1 %>% group_by(time_cat, sex, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+heart_1.tbl<-heart_1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+heart_1.tbl$sex[heart_1.tbl$sex == 0] <- "female"
+heart_1.tbl$sex[heart_1.tbl$sex == 1] <- "male"
+```
+
+```{r,include=FALSE}
+stargazer(heart_1.tbl, summary = F, rownames = F)
+```
+
+```{r}
+Table_1=heart_1.tbl%>%select("time_cat", "sex", 
+                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1", "Total","DeathProb")
+Table_1 %>% print(n = Inf)
+
+
+```
+
+```{r}
+ggplot(data = Table_1) + geom_bar(aes(x = sex, y = DeathProb,fill=sex),
+                                 position = "dodge", stat = "identity") +
+  ylab("Probability of Death") +
+  facet_wrap(~ time_cat)+geom_text(data=Table_1,color="white",aes(x=sex,y=DeathProb,label=sprintf("%0.3f",round(DeathProb,digits=3))),position=position_stack(0.5))
+```
+
+```{r}
+heartHBP_1=heartfaildata%>%select(time,DEATH_EVENT,high_blood_pressure)
+heartHBP_1=heartHBP_1%>%mutate(time_cat=cut(time,breaks=c(0,30,60,100,285)))%>%na.omit()
+heartHBP_1=heartHBP_1%>%relocate(time_cat,time)
+heartHBP_1.tbl <- heartHBP_1 %>% group_by(time_cat, high_blood_pressure, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+heartHBP_1.tbl<-heartHBP_1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+heartHBP_1.tbl$high_blood_pressure[heartHBP_1.tbl$high_blood_pressure == 0] <- "No"
+heartHBP_1.tbl$high_blood_pressure[heartHBP_1.tbl$high_blood_pressure == 1] <- "Yes"
+```
+
+```{r,include=FALSE}
+stargazer(heartHBP_1.tbl, summary = F, rownames = F)
+```
+
+```{r}
+TableHBP_1=heartHBP_1.tbl%>%select("time_cat", "high_blood_pressure", 
+                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1", "Total","DeathProb")
+TableHBP_1 %>% print(n = Inf)
+
+
+```
+
+```{r}
+ggplot(data = TableHBP_1) + geom_bar(aes(x = high_blood_pressure, y = DeathProb,fill=high_blood_pressure),
+                                 position = "dodge", stat = "identity") +
+  ylab("Probability of Death") +
+  facet_wrap(~ time_cat)+geom_text(data=TableHBP_1,color="white",aes(x=high_blood_pressure,y=DeathProb,label=sprintf("%0.5f",round(DeathProb,digits=5))),position=position_stack(0.5))
+```
+
+```{r}
+heartsmk_1=heartfaildata%>%select(time,DEATH_EVENT,smoking)
+heartsmk_1=heartsmk_1%>%mutate(time_cat=cut(time,breaks=c(0,30,60,100,285)))%>%na.omit()
+heartsmk_1=heartsmk_1%>%relocate(time_cat,time)
+heartsmk_1.tbl <- heartsmk_1 %>% group_by(time_cat, smoking, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`) 
+heartsmk_1.tbl<-heartsmk_1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+heartsmk_1.tbl$smoking[heartsmk_1.tbl$smoking == 0] <- "No"
+heartsmk_1.tbl$smoking[heartsmk_1.tbl$smoking == 1] <- "Yes"
+```
+
+```{r,include=FALSE}
+stargazer(heartsmk_1.tbl, summary = F, rownames = F)
+```
+
+```{r}
+Tablesmk_1=heartsmk_1.tbl%>%select("time_cat", "smoking", 
+                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1", "Total","DeathProb")
+Tablesmk_1 %>% print(n = Inf)
+
+
+```
+
+```{r}
+ggplot(data = Tablesmk_1) + geom_bar(aes(x = smoking, y = DeathProb,fill=smoking),
+                                 position = "dodge", stat = "identity") +
+  ylab("Probability of Death") +
+  facet_wrap(~ time_cat)+geom_text(data=Tablesmk_1,color="white",aes(x=smoking,y=DeathProb,label=sprintf("%0.5f",round(DeathProb,digits=5))),position=position_stack(0.5))
+```
+
+
+```{r}
+agesex1=heartfaildata%>%select(time,DEATH_EVENT,sex,age)
+agesex1=agesex1%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+agesex1=agesex1%>%mutate(age_cat=cut(age,breaks=c(39,50,60,70,80,95)))%>%na.omit()
+agesex1=agesex1%>%relocate(time_cat,time)
+agesex1.tbl <-agesex1 %>% group_by(time_cat,age_cat, sex, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+agesex1.tbl<-agesex1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+
+agesex.glm=glm(formula=cbind(`0` , `1`)~ age_cat+sex+factor(time_cat),family=binomial(link="logit"),data=agesex1.tbl)
+summary(agesex.glm)
+```
+
+```{r}
+
+ggplot(agesex.glm, aes(.fitted,.resid))+geom_point()+geom_smooth()+xlim(-4,4)
+```
+
+```{r}
+plot(agesex.glm)
+```
+
+```{r}
+fil.data1<-heartfaildata %>% select(platelets,sex)
+fil.data1=fil.data1%>%mutate(platelets_cat=cut(platelets,breaks=c(10000,150000,450000,850000),dig.lab=7))%>%na.omit()
+fil.data.tbl1 <- fil.data1 %>% group_by(platelets_cat,sex, .drop = F) %>%
+  tally() %>% spread(sex, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+```
+
+```{r,include=FALSE}
+stargazer(fil.data.tbl1, summary = F, rownames = F)
+```
+
+```{r}
+Tablefil.data1 = fil.data.tbl1 %>% select("platelets_cat","sex_female" = "0", "sex_male" = "1", "Total")
+Tablefil.data1 %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefil.data1) + geom_bar(aes(x = platelets_cat, y = Total,fill=platelets_cat),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefil.data1 , color = "white",
+            aes(x = platelets_cat, y = Total, label = Total), position = position_stack(0.5))  
+```
+
+```{r}
+heart_1=heartfaildata%>%select(time,DEATH_EVENT)
+heart_1=heart_1%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+heart_1=heart_1%>%relocate(time_cat,time)
+heart_1.tbl <- heart_1 %>% group_by(time_cat,  DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+heart_1.tbl<-heart_1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0)) 
+```
+
+```{r,include=FALSE}
+stargazer(heart_1.tbl, summary = F, rownames = F)
+```
+
+```{r}
+Table_1=heart_1.tbl%>%select("time_cat", 
+                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1", "Total","DeathProb")
+Table_1 %>% print(n = Inf)
+
+
+```
+
+```{r}
+ggplot(data = Table_1) + geom_bar(aes(x = time_cat, y = DeathProb,fill=time_cat),
+                                 position = "dodge", stat = "identity") +
+  ylab("DeathProb")+geom_text(data = Table_1 , color = "white",
+            aes(x = time_cat, y = DeathProb,label=sprintf("%0.3f",round(DeathProb,digits=3))),position=position_stack(0.5)) 
+```
+
+```{r}
+ggplot(data = Table_1) + geom_bar(aes(x = sex, y = DeathProb,fill=sex),
+                                 position = "dodge", stat = "identity") +
+  ylab("Probability of Death") +
+  facet_wrap(~ time_cat)+geom_text(data=Table_1,color="white",aes(x=sex,y=DeathProb,label=sprintf("%0.3f",round(DeathProb,digits=3))),position=position_stack(0.5))
+```
+
+```{r,include=FALSE}
+stargazer(filtered.data.tbl1, summary = F, rownames = F)
+```
+
+```{r}
+Tablefiltered.data1 = filtered.data.tbl1 %>% select("age_cat","sex_female" = "0", "sex_male" = "1", "Total")
+Tablefiltered.data1 %>% print(n = Inf)
+
+```
+
+
+```{r}
+ggplot(data = Tablefiltered.data1) + geom_bar(aes(x = age_cat, y = Total,fill=age_cat),
+                                 position = "dodge", stat = "identity") +
+  ylab("Count")+geom_text(data = Tablefiltered.data1 , color = "white",
+            aes(x = age_cat, y = Total, label = Total), position = position_stack(0.5))  
+```
+
