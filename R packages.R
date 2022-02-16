@@ -1,4 +1,4 @@
-install.packages(c("rmarkdown", "ggplot2","dplyr", "tidyr",
+install.packages(c("stargazer", "ggplot2","dplyr", 
                    "readr", "tidyverse"), 
                  dependencies = TRUE,
                  repos = 'http://cran.us.r-project.org')
