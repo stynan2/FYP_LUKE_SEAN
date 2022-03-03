@@ -1,0 +1,232 @@
+---
+title: "Models for project"
+author: "Luke Finn & Sean Tynan"
+date: "3/1/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(stargazer)
+library(dplyr)
+library(lmtest)
+heartfaildata=read.csv(file=file.choose())
+```
+
+
+```{r}
+modelnull=lm(DEATH_EVENT~1,data=heartfaildata)
+summary(modelnull)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(modelnull)
+```
+
+
+```{r}
+model1=lm(DEATH_EVENT~age+high_blood_pressure, data = heartfaildata)
+summary(model1)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(model1)
+```
+
+
+```{r}
+model2=lm(DEATH_EVENT~age+anaemia+creatinine_phosphokinase+diabetes+ejection_fraction+high_blood_pressure+platelets+serum_creatinine+serum_sodium+sex+smoking+time, data = heartfaildata)
+summary(model2)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model2)
+```
+
+```{r}
+agesqr=heartfaildata$age^2
+anmasqr=heartfaildata$anaemia^2
+creatphossqr=heartfaildata$creatinine_phosphokinase^2
+diabsqr=heartfaildata$diabetes^2
+ejectfracsqr=heartfaildata$ejection_fraction^2
+HBPsqr=heartfaildata$high_blood_pressure^2
+platesqr=heartfaildata$platelets^2
+sercreatsqr=heartfaildata$serum_creatinine^2
+sersodmsqr=heartfaildata$serum_sodium^2
+Sexsqr=heartfaildata$sex^2
+smokesqr=heartfaildata$smoking^2
+Time_1sqr=heartfaildata$time^2
+
+model3=lm(DEATH_EVENT~age+agesqr+anaemia+anmasqr+creatinine_phosphokinase+creatphossqr+diabetes+diabsqr+ejection_fraction+ejectfracsqr+high_blood_pressure+HBPsqr+platelets+platesqr+serum_creatinine+sercreatsqr+serum_sodium+sersodmsqr+sex+Sexsqr+smoking+smokesqr+time+Time_1sqr,data=heartfaildata)
+summary(model3)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model3)
+```
+
+```{r}
+anova(modelnull,model1,model2,model3)
+```
+```{r}
+lrtest(modelnull,model1,model2,model3)
+```
+
+
+
+
+
+
+```{r}
+glmnull=heartfaildata%>%select(DEATH_EVENT)
+glmnull.tbl <-glmnull %>% group_by(DEATH_EVENT, .drop = F)# %>%
+
+null.glm=glm(formula=DEATH_EVENT~ 1,family=binomial(link="logit"),data=glmnull.tbl)
+summary(null.glm)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(null.glm)
+```
+
+
+```{r}
+glm1=heartfaildata%>%select(DEATH_EVENT,time)
+glm1=glm1%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+
+glm1=glm1%>%relocate(time_cat,time)
+glm1.tbl <-glm1 %>% group_by(time_cat, DEATH_EVENT, .drop = F)
+
+first.glm=glm(formula=DEATH_EVENT~ factor(time_cat),family=binomial(link="logit"),data=glm1.tbl)
+summary(first.glm)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(first.glm)
+```
+
+
+
+
+```{r}
+glm2=heartfaildata%>%select(DEATH_EVENT,time,age,anaemia,creatinine_phosphokinase,diabetes,ejection_fraction,high_blood_pressure,platelets,serum_creatinine,serum_sodium,sex,smoking)
+glm2=glm2%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+
+glm2=glm2%>%relocate(time_cat,time)
+glm2.tbl <-glm2 %>% group_by(time_cat, DEATH_EVENT,age,anaemia,creatinine_phosphokinase,diabetes,ejection_fraction,high_blood_pressure,platelets,serum_creatinine,serum_sodium,sex,smoking, .drop = F)
+
+second.glm=glm(formula=DEATH_EVENT~age+anaemia+creatinine_phosphokinase+diabetes+ejection_fraction+high_blood_pressure+platelets+serum_creatinine+serum_sodium+sex+smoking +factor(time_cat),family=binomial(link="logit"),data=glm2.tbl)
+summary(second.glm)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(second.glm)
+```
+
+
+
+```{r}
+glm3=heartfaildata%>%select(DEATH_EVENT,time,creatinine_phosphokinase,serum_creatinine,serum_sodium)
+glm3=glm3%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+glm3=glm3%>%mutate(sersod_cat=cut(serum_sodium,breaks=c(110,135,145,150),dig.lab=7))%>%na.omit()
+glm3=glm3%>%mutate(sercre_cat=cut(serum_creatinine,breaks=c(0.49,1.3,2,9.5)))%>%na.omit()
+glm3=glm3%>%mutate(crepho_cat=cut(creatinine_phosphokinase,breaks=c(10,120,500,1000,8000),dig.lab=7))%>%na.omit()
+glm3=glm3%>%relocate(time_cat,time)
+glm3.tbl <-glm3 %>% group_by(time_cat, DEATH_EVENT,sersod_cat,sercre_cat,crepho_cat, .drop = F)
+
+third.glm=glm(formula=DEATH_EVENT~sersod_cat+sercre_cat+crepho_cat+factor(time_cat),family=binomial(link="logit"),data=glm3.tbl)
+summary(third.glm)
+```
+
+
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(third.glm)
+```
+
+
+```{r}
+Final1=heartfaildata%>%select(time,DEATH_EVENT,creatinine_phosphokinase,serum_creatinine,serum_sodium)
+Final1=Final1%>%mutate(time_cat=cut(time,breaks=c(0,10,30,60,100,285)))%>%na.omit()
+Final1=Final1%>%mutate(sersod_cat=cut(serum_sodium,breaks=c(110,135,145,150),dig.lab=7))%>%na.omit()
+Final1=Final1%>%mutate(sercre_cat=cut(serum_creatinine,breaks=c(0.49,1.3,2,9.5)))%>%na.omit()
+Final1=Final1%>%mutate(crepho_cat=cut(creatinine_phosphokinase,breaks=c(10,120,500,1000,8000),dig.lab=7))%>%na.omit()
+Final1=Final1%>%relocate(time_cat,time)
+Final1.tbl <-Final1 %>% group_by(time_cat,sersod_cat, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+Final1.tbl<-Final1.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+TableFinal1=Final1.tbl%>%select("time_cat", "sersod_cat",                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1","Total","DeathProb")
+ 
+Final2.tbl <-Final1 %>% group_by(time_cat,sercre_cat, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+Final2.tbl<-Final2.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+TableFinal2=Final2.tbl%>%select("time_cat", "sercre_cat",                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1","Total","DeathProb")
+
+Final3.tbl <-Final1 %>% group_by(time_cat,crepho_cat, DEATH_EVENT, .drop = F) %>%
+  tally() %>% spread(DEATH_EVENT, n, replace_na(0)) %>%
+  mutate(Total = `0` + `1`)
+Final3.tbl<-Final3.tbl%>%mutate(DeathProb=`1`/`Total`)%>%replace_na(list(Total=0,DeathProb=0))
+TableFinal3=Final3.tbl%>%select("time_cat", "crepho_cat",                              "DEATH_EVENT_No" = "0", "DEATH_EVENT_Yes" = "1","Total","DeathProb")
+merged.table <-Reduce(function(...) merge(..., all = TRUE),
+       list(TableFinal1, TableFinal2, TableFinal3))
+
+
+Final.glm=glm(formula=
+                cbind(DEATH_EVENT_No, DEATH_EVENT_Yes)~ factor(time_cat),family=binomial(link = "logit"),data=merged.table)
+summary(Final.glm)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(Final.glm)
+```
+```{r}
+anova(null.glm,first.glm,third.glm,second.glm)
+```
+```{r}
+qchisq(0.95,298)
+qchisq(0.95,4)
+qchisq(0.95,7)
+qchisq(0.95,11)
+qchisq(0.95,15)
+```
+
+```{r}
+lrtest(null.glm,first.glm,third.glm,second.glm)
+```
+
+
+```{r}
+anova(Final.glm)
+```
+
+```{r}
+qchisq(0.95,37)
+```
+
+```{r}
+lrtest(Final.glm)
+```
+
+
+
+
